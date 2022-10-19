@@ -1,0 +1,1 @@
+CREATE ROLE root WITH PASSWORD = 'root' AND SUPERUSER = true AND LOGIN = true;

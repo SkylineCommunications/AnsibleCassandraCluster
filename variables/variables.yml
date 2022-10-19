@@ -1,0 +1,17 @@
+---
+cluster_name: 'dataminerCassandraCluster'
+seeds: '"xx.xx.xx.xx,xx.xx.xx.xx"'
+hinted_handoff_throttle_in_kb: 10240
+max_hints_delivery_threads: 12
+authenticator: 'PasswordAuthenticator'
+data_file_directories: '/var/lib/cassandra/data'
+listen_address: "{{ansible_default_ipv4.address}}"
+listen_on_broadcast_address: true
+rpc_address: '0.0.0.0'
+broadcast_rpc_address: "{{ansible_default_ipv4.address}}"
+endpoint_snitch: 'GossipingPropertyFileSnitch'
+tombstone_warn_threshold: 1000000
+tombstone_failure_threshold: 2000000
+dc: 'dc1'
+rack: 'rack1'
+prefer_local: true

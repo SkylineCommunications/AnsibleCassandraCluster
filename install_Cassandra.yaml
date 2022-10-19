@@ -1,0 +1,67 @@
+---
+- name: Install and configure CassandraCluster
+  hosts: Cassandra
+  become: true
+  vars_files:
+    - home/ansible/install_cassandra/variables/cassandra_variables.yml
+  tasks:
+    - debug:
+        msg: Install Cassandra
+    - name: Add Cassandra ass source
+      ansible.builtin.shell: echo deb "https://debian.cassandra.apache.org 40x main" | sudo tee -a /etc/apt/sources.list.d/cassandra.sources.list
+    - name: Add key
+      ansible.builtin.shell: curl https://downloads.apache.org/cassandra/KEYS | sudo apt-key add -
+    - name: Update software list
+      ansible.builtin.shell: sudo apt-get update
+    - name: Install Cassandra
+      ansible.builtin.command: sudo apt-get install cassandra -y
+      
+    - debug:
+        msg:  Configure Firewall
+    - name: add ssh to firewall
+      community.general.ufw:
+        rule: allow
+        port: ssh
+        proto: tcp
+    - name: add port 9042
+      community.general.ufw:
+        rule: allow
+        port: '9042'
+        proto: tcp
+    - name: Add port range 7000:7001
+      community.general.ufw:
+        rule: allow
+        port: 7000:7001
+        proto: tcp
+    - name: Enable firewall
+      community.general.ufw:
+        state: enabled
+        
+    - debug:
+        msg: Configure Cassandra.yaml
+    - name: Stop Cassandra service
+      ansible.builtin.shell: sudo systemctl stop cassandra.service
+    - name: Remove cassandra folder
+      ansible.builtin.shell: sudo rm -r /var/lib/cassandra/data/*
+    - debug:
+        msg: Configure yaml files of Cassandra
+    - name: configure yaml
+      template:
+        src: /home/ansible/install_cassandra/config/cassandra.yaml.j2
+        dest: /etc/cassandra/testcassandra.yaml
+        mode: '0644'
+    - name: configure rack properties
+      template:
+        src: /home/ansible/install_cassandra/config/cassandra-rackdc.properties.j2
+        dest: /etc/cassandra/cassandra-rackdc.properties
+        mode: '0644'
+    - name: start cassandra service
+      ansible.builtin.shell: sudo systemctl start cassandra.service
+    
+    - name: Pause for 5 mintues so Casasandra can start
+      ansible.builtin.pause:
+        minutes: 5
+    - name: Configure root user (1/2)
+      ansible.builtin.shell: cqlsh -f /home/ansible/install_cassandra/cql/createRole.cql -u cassandra -p cassandra {{ansible_default_ipv4.address}}
+    - name: Configure root user (2/2)
+      ansible.builtin.shell: cqlsh -f /home/ansible/install_cassandra/cql/grantPermissions.cql -u cassandra -p cassandra {{ansible_default_ipv4.address}}
