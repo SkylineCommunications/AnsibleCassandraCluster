@@ -5,6 +5,10 @@ The supported operating system is all the system that are debian based (as we su
 
 The playbook should be executed with elevated rights as some super user actions are needed for the installation.
 
+With the playbook the latest version of Cassandra will be installed.
+However the configuration is tested for systems that install Cassandra 4.3. As futher version can have added values in the cassandra.yaml file.
+We'll keep an eye on this and keep this updated.
+
 Before running the playbook some variables need to be set in the variables.yml file.
 
 ## Before running the playbook
